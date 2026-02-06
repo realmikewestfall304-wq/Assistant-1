@@ -12,7 +12,7 @@ from typing import List, Dict, Optional
 
 class BusinessAssistant:
     """
-    A personal assistant that acts as a business savior, not a yes-man.
+    A personal assistant that acts as a business advisor, not a yes-man.
     Provides honest feedback, manages emails, appointments, and reminders.
     """
     
@@ -40,7 +40,7 @@ class BusinessAssistant:
     def evaluate_idea(self, idea: str) -> Dict[str, str]:
         """
         Evaluate a business idea with honest, constructive feedback.
-        Acts as a business savior, not a yes-man.
+        Acts as a business advisor, not a yes-man.
         """
         # Analyze the idea for potential issues
         concerns = []
@@ -111,8 +111,12 @@ class BusinessAssistant:
     
     def add_reminder(self, task: str, due_date: Optional[str] = None) -> Dict:
         """Add a reminder to keep you on task."""
+        # Generate safe ID based on max existing ID
+        existing_ids = [r["id"] for r in self.data["reminders"]]
+        next_id = max(existing_ids, default=0) + 1
+        
         reminder = {
-            "id": len(self.data["reminders"]) + 1,
+            "id": next_id,
             "task": task,
             "due_date": due_date,
             "created": datetime.now().isoformat(),
@@ -140,8 +144,12 @@ class BusinessAssistant:
     
     def add_appointment(self, title: str, date_time: str, notes: Optional[str] = None) -> Dict:
         """Schedule an appointment."""
+        # Generate safe ID based on max existing ID
+        existing_ids = [a["id"] for a in self.data["appointments"]]
+        next_id = max(existing_ids, default=0) + 1
+        
         appointment = {
-            "id": len(self.data["appointments"]) + 1,
+            "id": next_id,
             "title": title,
             "date_time": date_time,
             "notes": notes,
@@ -157,8 +165,12 @@ class BusinessAssistant:
     
     def add_email_draft(self, to: str, subject: str, body: str) -> Dict:
         """Create an email draft for review."""
+        # Generate safe ID based on max existing ID
+        existing_ids = [e["id"] for e in self.data["emails"]]
+        next_id = max(existing_ids, default=0) + 1
+        
         email = {
-            "id": len(self.data["emails"]) + 1,
+            "id": next_id,
             "to": to,
             "subject": subject,
             "body": body,
@@ -262,9 +274,12 @@ def main():
                 print(f"  [{r['id']}] {r['task']}{due}")
         
         elif choice == "4":
-            reminder_id = int(input("\nEnter reminder ID to complete: "))
-            result = assistant.complete_reminder(reminder_id)
-            print(f"\n{result['message']}")
+            try:
+                reminder_id = int(input("\nEnter reminder ID to complete: "))
+                result = assistant.complete_reminder(reminder_id)
+                print(f"\n{result['message']}")
+            except ValueError:
+                print("\n❌ Invalid input. Please enter a number.")
         
         elif choice == "5":
             title = input("\nAppointment title: ")

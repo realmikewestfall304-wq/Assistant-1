@@ -81,7 +81,7 @@ All your data is stored locally in `assistant_data.json` in the same directory. 
 
 ## Philosophy
 
-This assistant is designed to be your **business savior**, not a yes-man. It will:
+This assistant is designed to be your **business advisor**, not a yes-man. It will:
 - Tell you the truth when ideas need work
 - Keep you focused on what matters
 - Help you stay organized and on task
