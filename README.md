@@ -36,7 +36,12 @@ git clone https://github.com/realmikewestfall304-wq/Assistant-1.git
 cd Assistant-1
 ```
 
-2. Run the assistant (requires Python 3.6+):
+2. Run the example to see it in action:
+```bash
+python3 example.py
+```
+
+3. Start the interactive assistant (requires Python 3.6+):
 ```bash
 python3 assistant.py
 ```
