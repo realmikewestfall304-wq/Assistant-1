@@ -1,0 +1,41 @@
+# Business Mentor Agent - Requirements
+# Python dependencies for the agent
+
+# Core dependencies
+python-dateutil>=2.8.2
+typing-extensions>=4.5.0
+
+# For API integrations (optional, based on needed integrations)
+requests>=2.31.0
+httpx>=0.24.0
+
+# For email handling (optional)
+# email-validator>=2.0.0
+# imapclient>=2.3.1
+
+# For calendar integrations (optional)
+# google-api-python-client>=2.88.0
+# python-icalendar>=5.0.7
+
+# For database storage (optional)
+# sqlalchemy>=2.0.0
+# psycopg2-binary>=2.9.6
+
+# For API serving (optional, for web deployment)
+# fastapi>=0.100.0
+# uvicorn>=0.23.0
+# pydantic>=2.0.0
+
+# For security
+# cryptography>=41.0.0
+# python-dotenv>=1.0.0
+
+# For logging and monitoring
+# loguru>=0.7.0
+
+# Development dependencies (uncomment for development)
+# pytest>=7.4.0
+# pytest-cov>=4.1.0
+# black>=23.7.0
+# flake8>=6.1.0
+# mypy>=1.4.0
