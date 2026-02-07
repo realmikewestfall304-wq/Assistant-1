@@ -12,6 +12,7 @@ const TasksPage = () => {
 
   useEffect(() => {
     loadTasks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
   const loadTasks = async () => {
