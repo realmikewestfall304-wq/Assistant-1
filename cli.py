@@ -80,23 +80,22 @@ def handle_email_command(assistant: IntegratedAssistant, args: list):
     action = args[0]
     
     if action == "list":
-        result = assistant.process_request("email", action="list")
-        print(json.dumps(result["response"], indent=2))
+        result = assistant.office_manager.manage_emails("list")
+        print(json.dumps(result, indent=2))
     elif action == "send":
         if len(args) < 4:
             print("USAGE: python cli.py email send <to> <subject> <body>")
             return
-        result = assistant.process_request(
-            "email",
-            action="send",
-            to=args[1],
-            subject=args[2],
-            body=" ".join(args[3:])
-        )
-        print(json.dumps(result["response"], indent=2))
+        kwargs = {
+            "to": args[1],
+            "subject": args[2],
+            "body": " ".join(args[3:])
+        }
+        result = assistant.office_manager.manage_emails("send", **kwargs)
+        print(json.dumps(result, indent=2))
     else:
-        result = assistant.process_request("email", action=action)
-        print(json.dumps(result["response"], indent=2))
+        result = assistant.office_manager.manage_emails(action)
+        print(json.dumps(result, indent=2))
 
 
 def handle_appointment_command(assistant: IntegratedAssistant, args: list):
@@ -109,8 +108,8 @@ def handle_appointment_command(assistant: IntegratedAssistant, args: list):
     action = args[0]
     
     if action == "list":
-        result = assistant.process_request("appointment", action="list")
-        print(json.dumps(result["response"], indent=2))
+        result = assistant.office_manager.manage_appointments("list")
+        print(json.dumps(result, indent=2))
     elif action == "schedule":
         if len(args) < 3:
             print("USAGE: python cli.py appointment schedule <title> <datetime>")
@@ -123,8 +122,8 @@ def handle_appointment_command(assistant: IntegratedAssistant, args: list):
         result = assistant.office_manager.manage_appointments("schedule", **kwargs)
         print(json.dumps(result, indent=2))
     else:
-        result = assistant.process_request("appointment", action=action)
-        print(json.dumps(result["response"], indent=2))
+        result = assistant.office_manager.manage_appointments(action)
+        print(json.dumps(result, indent=2))
 
 
 def handle_quote_command(assistant: IntegratedAssistant, args: list):
@@ -135,8 +134,8 @@ def handle_quote_command(assistant: IntegratedAssistant, args: list):
         return
     
     action = args[0]
-    result = assistant.process_request("quote", action=action)
-    print(json.dumps(result["response"], indent=2))
+    result = assistant.office_manager.manage_quotes(action)
+    print(json.dumps(result, indent=2))
 
 
 def handle_paperwork_command(assistant: IntegratedAssistant, args: list):
@@ -147,8 +146,8 @@ def handle_paperwork_command(assistant: IntegratedAssistant, args: list):
         return
     
     action = args[0]
-    result = assistant.process_request("paperwork", action=action)
-    print(json.dumps(result["response"], indent=2))
+    result = assistant.office_manager.manage_paperwork(action)
+    print(json.dumps(result, indent=2))
 
 
 def handle_dashboard_command(assistant: IntegratedAssistant, args: list):
@@ -199,9 +198,12 @@ def main():
     elif command == "email":
         handle_email_command(assistant, args)
     elif command == "call":
-        # Similar to email
-        result = assistant.process_request("call", action=args[0] if args else "get_log")
-        print(json.dumps(result["response"], indent=2))
+        # Handle call commands
+        if not args:
+            result = assistant.office_manager.manage_phone_calls("get_log")
+        else:
+            result = assistant.office_manager.manage_phone_calls(args[0])
+        print(json.dumps(result, indent=2))
     elif command == "appointment":
         handle_appointment_command(assistant, args)
     elif command == "quote":
