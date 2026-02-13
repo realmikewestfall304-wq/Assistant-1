@@ -77,7 +77,7 @@ else
   exit 1
 fi
 
-if echo "$UPLOAD_RESPONSE" | grep -q "\"filename\":"; then
+if echo "$UPLOAD_RESPONSE" | grep -q "\"attachment_filename\":"; then
   echo -e "${GREEN}✓ PASS: File was saved with generated filename${NC}"
 else
   echo -e "${RED}✗ FAIL: File metadata not in response${NC}"
