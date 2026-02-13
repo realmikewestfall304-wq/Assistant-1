@@ -10,23 +10,32 @@ import MentorPage from './pages/MentorPage';
 import BusinessPlanPage from './pages/BusinessPlanPage';
 import CommunicationsPage from './pages/CommunicationsPage';
 import ManagementPage from './pages/ManagementPage';
+import RestaurantMaintenanceApp from './pages/RestaurantMaintenance/RestaurantMaintenanceApp';
 
 function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/tasks" element={<TasksPage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/reminders" element={<RemindersPage />} />
-          <Route path="/financial" element={<FinancialPage />} />
-          <Route path="/mentor" element={<MentorPage />} />
-          <Route path="/business-plan" element={<BusinessPlanPage />} />
-          <Route path="/communications" element={<CommunicationsPage />} />
-          <Route path="/management" element={<ManagementPage />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        {/* Restaurant Maintenance System - Standalone route */}
+        <Route path="/restaurant-maintenance" element={<RestaurantMaintenanceApp />} />
+        
+        {/* Main Assistant-1 App routes */}
+        <Route path="/*" element={
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/tasks" element={<TasksPage />} />
+              <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/reminders" element={<RemindersPage />} />
+              <Route path="/financial" element={<FinancialPage />} />
+              <Route path="/mentor" element={<MentorPage />} />
+              <Route path="/business-plan" element={<BusinessPlanPage />} />
+              <Route path="/communications" element={<CommunicationsPage />} />
+              <Route path="/management" element={<ManagementPage />} />
+            </Routes>
+          </Layout>
+        } />
+      </Routes>
     </Router>
   );
 }

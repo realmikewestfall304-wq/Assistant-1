@@ -1,0 +1,161 @@
+.work-order-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border-left: 4px solid #ddd;
+}
+
+.work-order-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.priority-badge,
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.priority-critical {
+  background-color: #dc3545;
+  color: white;
+}
+
+.priority-high {
+  background-color: #fd7e14;
+  color: white;
+}
+
+.priority-medium {
+  background-color: #ffc107;
+  color: #333;
+}
+
+.priority-low {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-pending {
+  background-color: #6c757d;
+  color: white;
+}
+
+.status-assigned {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.status-in-progress {
+  background-color: #007bff;
+  color: white;
+}
+
+.status-completed {
+  background-color: #28a745;
+  color: white;
+}
+
+.status-closed {
+  background-color: #343a40;
+  color: white;
+}
+
+.card-id {
+  color: #999;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.card-title {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.card-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.detail-icon {
+  font-size: 16px;
+}
+
+.card-description {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 15px 0;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  color: #999;
+  font-size: 12px;
+}
+
+.footer-item small {
+  color: #999;
+}
+
+/* Priority-based left border */
+.work-order-card.priority-critical {
+  border-left-color: #dc3545;
+}
+
+.work-order-card.priority-high {
+  border-left-color: #fd7e14;
+}
+
+.work-order-card.priority-medium {
+  border-left-color: #ffc107;
+}
+
+.work-order-card.priority-low {
+  border-left-color: #28a745;
+}
+
+@media (max-width: 768px) {
+  .card-badges {
+    flex-wrap: wrap;
+  }
+
+  .card-footer {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
