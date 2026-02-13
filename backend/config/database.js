@@ -182,6 +182,67 @@ function initializeDatabase() {
       )
     `);
 
+    // Restaurant Maintenance System - Users table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL,
+        store_name TEXT,
+        email TEXT,
+        phone TEXT,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Restaurant Maintenance System - Work Orders table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS work_orders (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        store_name TEXT NOT NULL,
+        store_address TEXT,
+        location_details TEXT,
+        category TEXT NOT NULL,
+        priority TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        status TEXT DEFAULT 'pending',
+        submitted_by INTEGER,
+        assigned_to INTEGER,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        completed_at TEXT,
+        FOREIGN KEY (submitted_by) REFERENCES users(id),
+        FOREIGN KEY (assigned_to) REFERENCES users(id)
+      )
+    `);
+
+    // Restaurant Maintenance System - Work Order Updates table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS work_order_updates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        work_order_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        update_text TEXT NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (work_order_id) REFERENCES work_orders(id),
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      )
+    `);
+
+    // Restaurant Maintenance System - Attachments table
+    db.run(`
+      CREATE TABLE IF NOT EXISTS attachments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        work_order_id INTEGER NOT NULL,
+        file_name TEXT NOT NULL,
+        file_path TEXT NOT NULL,
+        uploaded_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (work_order_id) REFERENCES work_orders(id)
+      )
+    `);
+
     console.log('✅ Database schema initialized');
   });
 }
