@@ -70,6 +70,20 @@ Access expert guidance on:
 - Notes and action items
 - Search and categorization
 
+#### 🏪 **Restaurant Maintenance System** (NEW!)
+Complete facility maintenance work order system for restaurant chains:
+- **Store Manager Portal** - Submit maintenance requests with photos
+- **Maintenance Provider Portal** - View and manage all work orders
+- **Priority Management** - Critical, High, Medium, Low urgency levels
+- **Status Tracking** - Pending → Assigned → In Progress → Completed
+- **Categories** - Lighting, Equipment, HVAC, Plumbing, Safety, Upkeep
+- **Photo Attachments** - Upload up to 5 images per work order
+- **Real-time Updates** - Add notes and communicate on work orders
+- **Advanced Filtering** - Search by status, priority, category, location
+- **Role-based Access** - Store managers, maintenance providers, admins
+
+📖 **[View Restaurant Maintenance Guide](./docs/restaurant-maintenance-guide.md)**
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -86,6 +100,9 @@ cd Assistant-1
 # Install all dependencies (backend + frontend)
 npm run install-all
 
+# Seed the restaurant maintenance database
+node backend/seedData.js
+
 # Start the application
 npm run dev
 ```
@@ -93,6 +110,7 @@ npm run dev
 The application will be available at:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
+- **Restaurant Maintenance**: http://localhost:3000/restaurant-maintenance
 
 ### First Run
 

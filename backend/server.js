@@ -17,6 +17,9 @@ const mentorRouter = require('./api/mentor');
 const businessPlanRouter = require('./api/businessPlan');
 const communicationsRouter = require('./api/communications');
 const managementRouter = require('./api/management');
+const authRouter = require('./api/auth');
+const workOrdersRouter = require('./api/workOrders');
+const usersRouter = require('./api/users');
 
 // Initialize database
 const db = require('./config/database');
@@ -30,6 +33,9 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
 // API Routes
 app.use('/api/tasks', tasksRouter);
 app.use('/api/calendar', calendarRouter);
@@ -39,6 +45,11 @@ app.use('/api/mentor', mentorRouter);
 app.use('/api/business-plan', businessPlanRouter);
 app.use('/api/communications', communicationsRouter);
 app.use('/api/management', managementRouter);
+
+// Restaurant Maintenance API Routes
+app.use('/api/auth', authRouter);
+app.use('/api/work-orders', workOrdersRouter);
+app.use('/api/users', usersRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
