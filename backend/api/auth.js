@@ -4,9 +4,10 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 const { verifyToken, JWT_SECRET } = require('../middleware/auth');
+const { authLimiter, apiLimiter } = require('../middleware/rateLimiter');
 
 // Register new user
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
   try {
     const { username, password, role, store_name, email, phone } = req.body;
 
@@ -64,7 +65,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login
-router.post('/login', (req, res) => {
+router.post('/login', authLimiter, (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -115,7 +116,7 @@ router.post('/login', (req, res) => {
 });
 
 // Get current user
-router.get('/me', verifyToken, (req, res) => {
+router.get('/me', apiLimiter, verifyToken, (req, res) => {
   const query = 'SELECT id, username, role, store_name, email, phone, created_at FROM users WHERE id = ?';
 
   db.get(query, [req.user.id], (err, user) => {

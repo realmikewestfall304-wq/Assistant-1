@@ -17,7 +17,7 @@ const WorkOrderDetails = ({ workOrderId, token, user, onBack }) => {
     if (user.role === 'maintenance_provider' || user.role === 'admin') {
       fetchTechnicians();
     }
-  }, [workOrderId]);
+  }, [workOrderId, user.role]);
 
   const fetchWorkOrderDetails = async () => {
     try {
@@ -110,7 +110,7 @@ const WorkOrderDetails = ({ workOrderId, token, user, onBack }) => {
   };
 
   const formatStatus = (status) => {
-    return status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    return status.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
   if (loading) {

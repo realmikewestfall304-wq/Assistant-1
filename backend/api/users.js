@@ -2,9 +2,10 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
 const { verifyToken, requireRole } = require('../middleware/auth');
+const { apiLimiter } = require('../middleware/rateLimiter');
 
 // Get all users (admin only)
-router.get('/', verifyToken, requireRole('admin'), (req, res) => {
+router.get('/', apiLimiter, verifyToken, requireRole('admin'), (req, res) => {
   const query = 'SELECT id, username, role, store_name, email, phone, created_at FROM users';
 
   db.all(query, [], (err, users) => {
@@ -17,7 +18,7 @@ router.get('/', verifyToken, requireRole('admin'), (req, res) => {
 });
 
 // Get maintenance providers/technicians
-router.get('/technicians', verifyToken, (req, res) => {
+router.get('/technicians', apiLimiter, verifyToken, (req, res) => {
   const query = `
     SELECT id, username, email, phone, store_name 
     FROM users 

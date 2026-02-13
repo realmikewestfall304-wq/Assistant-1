@@ -1,7 +1,16 @@
 const jwt = require('jsonwebtoken');
 
-// Secret key for JWT (in production, use environment variable)
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+// Secret key for JWT - must be set in production
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.warn('⚠️  WARNING: JWT_SECRET not set in environment variables. Using insecure default for development only.');
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET must be set in production environment');
+  }
+}
+
+const JWT_SECRET_WITH_FALLBACK = JWT_SECRET || 'your-secret-key-change-in-production';
 
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
@@ -12,7 +21,7 @@ const verifyToken = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET_WITH_FALLBACK);
     req.user = decoded;
     next();
   } catch (error) {
@@ -38,5 +47,5 @@ const requireRole = (...roles) => {
 module.exports = {
   verifyToken,
   requireRole,
-  JWT_SECRET
+  JWT_SECRET: JWT_SECRET_WITH_FALLBACK
 };

@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const crypto = require('crypto');
 const db = require('../config/database');
 const { verifyToken, requireRole } = require('../middleware/auth');
+const { apiLimiter, uploadLimiter } = require('../middleware/rateLimiter');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -11,7 +13,8 @@ const storage = multer.diskStorage({
     cb(null, 'uploads/work-orders/');
   },
   filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    // Use crypto for secure random filename
+    const uniqueSuffix = crypto.randomBytes(16).toString('hex');
     cb(null, uniqueSuffix + path.extname(file.originalname));
   }
 });
@@ -32,7 +35,7 @@ const upload = multer({
 });
 
 // Get all work orders with optional filters
-router.get('/', verifyToken, (req, res) => {
+router.get('/', apiLimiter, verifyToken, (req, res) => {
   const { status, priority, category, store_name, search } = req.query;
   
   let query = `
@@ -91,7 +94,7 @@ router.get('/', verifyToken, (req, res) => {
 });
 
 // Get single work order by ID
-router.get('/:id', verifyToken, (req, res) => {
+router.get('/:id', apiLimiter, verifyToken, (req, res) => {
   const query = `
     SELECT wo.*, 
            u1.username as submitted_by_username,
@@ -143,7 +146,7 @@ router.get('/:id', verifyToken, (req, res) => {
 });
 
 // Create new work order
-router.post('/', verifyToken, upload.array('photos', 5), (req, res) => {
+router.post('/', uploadLimiter, verifyToken, upload.array('photos', 5), (req, res) => {
   const {
     store_name,
     store_address,
@@ -200,7 +203,7 @@ router.post('/', verifyToken, upload.array('photos', 5), (req, res) => {
 });
 
 // Update work order
-router.put('/:id', verifyToken, (req, res) => {
+router.put('/:id', apiLimiter, verifyToken, (req, res) => {
   const { status, assigned_to, priority, title, description } = req.body;
   
   let query = 'UPDATE work_orders SET updated_at = CURRENT_TIMESTAMP';
@@ -253,7 +256,7 @@ router.put('/:id', verifyToken, (req, res) => {
 });
 
 // Add update/note to work order
-router.post('/:id/updates', verifyToken, (req, res) => {
+router.post('/:id/updates', apiLimiter, verifyToken, (req, res) => {
   const { update_text } = req.body;
 
   if (!update_text) {
@@ -275,7 +278,7 @@ router.post('/:id/updates', verifyToken, (req, res) => {
 });
 
 // Upload attachment to existing work order
-router.post('/:id/upload', verifyToken, upload.single('photo'), (req, res) => {
+router.post('/:id/upload', uploadLimiter, verifyToken, upload.single('photo'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
