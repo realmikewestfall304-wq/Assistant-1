@@ -142,9 +142,9 @@ router.get('/dashboard/stats', (req, res) => {
       e.todays_events,
       r.active_reminders,
       g.active_goals,
-      f.income as monthly_income,
-      f.expenses as monthly_expenses,
-      (f.income - f.expenses) as monthly_profit
+      COALESCE(f.income, 0) as monthly_income,
+      COALESCE(f.expenses, 0) as monthly_expenses,
+      (COALESCE(f.income, 0) - COALESCE(f.expenses, 0)) as monthly_profit
     FROM task_stats t, event_stats e, reminder_stats r, goal_stats g, financial_stats f
   `;
   

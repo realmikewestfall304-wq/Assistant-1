@@ -132,8 +132,9 @@ router.get('/advice', (req, res) => {
   const cacheKey = 'all-advice';
   
   // Check cache first
-  if (cache.has(cacheKey)) {
-    return res.json(cache.get(cacheKey).value);
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    return res.json(cachedData);
   }
   
   const allAdvice = [];

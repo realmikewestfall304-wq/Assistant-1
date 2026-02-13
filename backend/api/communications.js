@@ -219,8 +219,9 @@ router.get('/templates', (req, res) => {
   const cacheKey = 'communication-templates';
   
   // Check cache first
-  if (cache.has(cacheKey)) {
-    return res.json(cache.get(cacheKey).value);
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    return res.json(cachedData);
   }
   
   const templates = [

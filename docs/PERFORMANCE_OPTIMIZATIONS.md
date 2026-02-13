@@ -204,7 +204,7 @@ npm run server
 4. Monitor database file growth with WAL mode
 
 ## Dependencies Added
-- `compression` (^1.7.4) - For response compression
+- `compression` (^1.8.1) - For response compression
 
 ## Files Modified
 - `backend/config/database.js` - Database optimizations and indexes

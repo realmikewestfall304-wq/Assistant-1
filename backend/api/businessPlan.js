@@ -178,8 +178,9 @@ router.get('/templates', (req, res) => {
   const cacheKey = 'business-plan-templates';
   
   // Check cache first
-  if (cache.has(cacheKey)) {
-    return res.json(cache.get(cacheKey).value);
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    return res.json(cachedData);
   }
   
   const templates = [
@@ -240,8 +241,9 @@ router.get('/swot-template', (req, res) => {
   const cacheKey = 'swot-template';
   
   // Check cache first
-  if (cache.has(cacheKey)) {
-    return res.json(cache.get(cacheKey).value);
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    return res.json(cachedData);
   }
   
   const template = {
