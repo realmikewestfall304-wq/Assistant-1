@@ -185,8 +185,13 @@ All other optimizations are transparent to the API consumers.
 2. **Redis Cache:** For multi-instance deployments, replace in-memory cache with Redis
 3. **Query Monitoring:** Add query performance monitoring to identify slow queries
 4. **Load Testing:** Conduct load tests to measure actual performance improvements
-5. **API Rate Limiting:** Add rate limiting to prevent abuse
+5. **API Rate Limiting:** Add rate limiting to prevent abuse (Security recommendation from CodeQL scan)
 6. **Database Backups:** Ensure regular backups with WAL mode enabled
+
+## Security Notes
+
+During security scanning, one alert was identified:
+- **Missing rate-limiting on dashboard stats endpoint** - This is a pre-existing issue not introduced by these changes. Rate-limiting should be implemented as a separate security enhancement to prevent potential abuse of database-intensive endpoints.
 
 ## Testing
 
