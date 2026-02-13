@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const cache = require('../utils/cache');
 
 // Get all business plans
 router.get('/plans', (req, res) => {
@@ -174,6 +175,13 @@ router.put('/goals/:id', (req, res) => {
 
 // Get business plan templates
 router.get('/templates', (req, res) => {
+  const cacheKey = 'business-plan-templates';
+  
+  // Check cache first
+  if (cache.has(cacheKey)) {
+    return res.json(cache.get(cacheKey).value);
+  }
+  
   const templates = [
     {
       id: 1,
@@ -221,11 +229,21 @@ router.get('/templates', (req, res) => {
     }
   ];
   
+  // Cache for 1 hour
+  cache.set(cacheKey, templates, 3600000);
+  
   res.json(templates);
 });
 
 // Get SWOT analysis template
 router.get('/swot-template', (req, res) => {
+  const cacheKey = 'swot-template';
+  
+  // Check cache first
+  if (cache.has(cacheKey)) {
+    return res.json(cache.get(cacheKey).value);
+  }
+  
   const template = {
     title: 'SWOT Analysis',
     description: 'Analyze your business Strengths, Weaknesses, Opportunities, and Threats',
@@ -268,6 +286,9 @@ router.get('/swot-template', (req, res) => {
       }
     }
   };
+  
+  // Cache for 1 hour
+  cache.set(cacheKey, template, 3600000);
   
   res.json(template);
 });

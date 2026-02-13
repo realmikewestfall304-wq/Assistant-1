@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const cache = require('../utils/cache');
 
 // Get all contacts
 router.get('/contacts', (req, res) => {
@@ -215,6 +216,13 @@ router.get('/follow-ups', (req, res) => {
 
 // Get quick response templates
 router.get('/templates', (req, res) => {
+  const cacheKey = 'communication-templates';
+  
+  // Check cache first
+  if (cache.has(cacheKey)) {
+    return res.json(cache.get(cacheKey).value);
+  }
+  
   const templates = [
     {
       id: 1,
@@ -241,6 +249,9 @@ router.get('/templates', (req, res) => {
       content: 'Thank you for [SPECIFIC ACTION]. I really appreciate your [TIME/HELP/SUPPORT].'
     }
   ];
+  
+  // Cache for 1 hour
+  cache.set(cacheKey, templates, 3600000);
   
   res.json(templates);
 });
