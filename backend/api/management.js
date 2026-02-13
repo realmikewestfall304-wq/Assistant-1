@@ -111,53 +111,61 @@ router.delete('/knowledge/:id', (req, res) => {
 
 // Get dashboard statistics
 router.get('/dashboard/stats', (req, res) => {
-  const stats = {};
-  let completed = 0;
-  let total = 5; // Total number of queries
-
-  // Get tasks count
-  db.get('SELECT COUNT(*) as count FROM tasks WHERE completed = 0', [], (err, row) => {
-    if (!err) stats.pending_tasks = row.count;
-    if (++completed === total) res.json(stats);
-  });
-
-  // Get today's events
   const today = new Date().toISOString().split('T')[0];
-  db.get('SELECT COUNT(*) as count FROM calendar_events WHERE DATE(start_time) = ?', [today], (err, row) => {
-    if (!err) stats.todays_events = row.count;
-    if (++completed === total) res.json(stats);
-  });
-
-  // Get active reminders
-  db.get('SELECT COUNT(*) as count FROM reminders WHERE status = ?', ['active'], (err, row) => {
-    if (!err) stats.active_reminders = row.count;
-    if (++completed === total) res.json(stats);
-  });
-
-  // Get active business goals
-  db.get('SELECT COUNT(*) as count FROM business_goals WHERE status = ?', ['active'], (err, row) => {
-    if (!err) stats.active_goals = row.count;
-    if (++completed === total) res.json(stats);
-  });
-
-  // Get this month's financial summary
   const firstDayOfMonth = new Date();
   firstDayOfMonth.setDate(1);
   const firstDay = firstDayOfMonth.toISOString().split('T')[0];
   
-  db.get(`
+  // Use a single query with multiple CTEs for better performance
+  const query = `
+    WITH task_stats AS (
+      SELECT COUNT(*) as pending_tasks FROM tasks WHERE completed = 0
+    ),
+    event_stats AS (
+      SELECT COUNT(*) as todays_events FROM calendar_events WHERE DATE(start_time) = ?
+    ),
+    reminder_stats AS (
+      SELECT COUNT(*) as active_reminders FROM reminders WHERE status = 'active'
+    ),
+    goal_stats AS (
+      SELECT COUNT(*) as active_goals FROM business_goals WHERE status = 'active'
+    ),
+    financial_stats AS (
+      SELECT 
+        SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
+        SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expenses
+      FROM financial_transactions 
+      WHERE date >= ?
+    )
     SELECT 
-      SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income,
-      SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expenses
-    FROM financial_transactions 
-    WHERE date >= ?
-  `, [firstDay], (err, row) => {
-    if (!err) {
-      stats.monthly_income = row.income || 0;
-      stats.monthly_expenses = row.expenses || 0;
-      stats.monthly_profit = (row.income || 0) - (row.expenses || 0);
+      t.pending_tasks,
+      e.todays_events,
+      r.active_reminders,
+      g.active_goals,
+      f.income as monthly_income,
+      f.expenses as monthly_expenses,
+      (f.income - f.expenses) as monthly_profit
+    FROM task_stats t, event_stats e, reminder_stats r, goal_stats g, financial_stats f
+  `;
+  
+  db.get(query, [today, firstDay], (err, row) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
     }
-    if (++completed === total) res.json(stats);
+    
+    // Handle null values
+    const stats = {
+      pending_tasks: row.pending_tasks || 0,
+      todays_events: row.todays_events || 0,
+      active_reminders: row.active_reminders || 0,
+      active_goals: row.active_goals || 0,
+      monthly_income: row.monthly_income || 0,
+      monthly_expenses: row.monthly_expenses || 0,
+      monthly_profit: row.monthly_profit || 0
+    };
+    
+    res.json(stats);
   });
 });
 

@@ -4,7 +4,7 @@ const db = require('../config/database');
 
 // Get all transactions
 router.get('/transactions', (req, res) => {
-  const { type, category, start_date, end_date } = req.query;
+  const { type, category, start_date, end_date, page, limit } = req.query;
   let query = 'SELECT * FROM financial_transactions WHERE 1=1';
   const params = [];
 
@@ -27,12 +27,57 @@ router.get('/transactions', (req, res) => {
 
   query += ' ORDER BY date DESC';
 
+  // Add pagination
+  const pageNum = parseInt(page) || 1;
+  const limitNum = parseInt(limit) || 50;
+  const offset = (pageNum - 1) * limitNum;
+  
+  query += ' LIMIT ? OFFSET ?';
+  params.push(limitNum, offset);
+
   db.all(query, params, (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    res.json(rows);
+    
+    // Get total count for pagination metadata
+    let countQuery = 'SELECT COUNT(*) as total FROM financial_transactions WHERE 1=1';
+    const countParams = [];
+    
+    if (type) {
+      countQuery += ' AND type = ?';
+      countParams.push(type);
+    }
+    if (category) {
+      countQuery += ' AND category = ?';
+      countParams.push(category);
+    }
+    if (start_date) {
+      countQuery += ' AND date >= ?';
+      countParams.push(start_date);
+    }
+    if (end_date) {
+      countQuery += ' AND date <= ?';
+      countParams.push(end_date);
+    }
+    
+    db.get(countQuery, countParams, (err, countRow) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      
+      res.json({
+        data: rows,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: countRow.total,
+          totalPages: Math.ceil(countRow.total / limitNum)
+        }
+      });
+    });
   });
 });
 
