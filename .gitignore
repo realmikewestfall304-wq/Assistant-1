@@ -8,6 +8,8 @@ frontend/node_modules/
 # Database
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
 
 # Build outputs
 frontend/build/

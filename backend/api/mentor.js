@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const cache = require('../utils/cache');
 
 // Mentorship advice library organized by topic
 const adviceLibrary = {
@@ -128,10 +129,22 @@ router.get('/advice/:topic', (req, res) => {
 
 // Get all advice
 router.get('/advice', (req, res) => {
+  const cacheKey = 'all-advice';
+  
+  // Check cache first
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    return res.json(cachedData);
+  }
+  
   const allAdvice = [];
   for (const topic in adviceLibrary) {
     allAdvice.push(...adviceLibrary[topic]);
   }
+  
+  // Cache for 1 hour (3600000ms)
+  cache.set(cacheKey, allAdvice, 3600000);
+  
   res.json(allAdvice);
 });
 

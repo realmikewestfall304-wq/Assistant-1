@@ -4,7 +4,7 @@ const db = require('../config/database');
 
 // Get all tasks
 router.get('/', (req, res) => {
-  const { category, status, priority } = req.query;
+  const { category, status, priority, page, limit } = req.query;
   let query = 'SELECT * FROM tasks WHERE 1=1';
   const params = [];
 
@@ -23,12 +23,53 @@ router.get('/', (req, res) => {
 
   query += ' ORDER BY due_date ASC, priority DESC';
 
+  // Add pagination
+  const pageNum = parseInt(page) || 1;
+  const limitNum = parseInt(limit) || 50;
+  const offset = (pageNum - 1) * limitNum;
+  
+  query += ' LIMIT ? OFFSET ?';
+  params.push(limitNum, offset);
+
   db.all(query, params, (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    res.json(rows);
+    
+    // Get total count for pagination metadata
+    let countQuery = 'SELECT COUNT(*) as total FROM tasks WHERE 1=1';
+    const countParams = [];
+    
+    if (category) {
+      countQuery += ' AND category = ?';
+      countParams.push(category);
+    }
+    if (status) {
+      countQuery += ' AND status = ?';
+      countParams.push(status);
+    }
+    if (priority) {
+      countQuery += ' AND priority = ?';
+      countParams.push(priority);
+    }
+    
+    db.get(countQuery, countParams, (err, countRow) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      
+      res.json({
+        data: rows,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: countRow.total,
+          totalPages: Math.ceil(countRow.total / limitNum)
+        }
+      });
+    });
   });
 });
 

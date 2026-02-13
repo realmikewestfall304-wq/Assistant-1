@@ -1,4 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('sqlite3');
 const path = require('path');
 const fs = require('fs');
 
@@ -17,9 +17,24 @@ const db = new sqlite3.Database(dbPath, (err) => {
     console.error('Error opening database:', err.message);
   } else {
     console.log('✅ Connected to SQLite database');
+    optimizeDatabase();
     initializeDatabase();
   }
 });
+
+// Optimize database performance
+function optimizeDatabase() {
+  db.serialize(() => {
+    // Enable Write-Ahead Logging for better concurrency
+    db.run('PRAGMA journal_mode = WAL;');
+    // Increase cache size to 10MB
+    db.run('PRAGMA cache_size = -10000;');
+    // Use synchronous=NORMAL for better performance (still safe with WAL)
+    db.run('PRAGMA synchronous = NORMAL;');
+    // Store temporary tables in memory
+    db.run('PRAGMA temp_store = MEMORY;');
+  });
+}
 
 // Initialize database schema
 function initializeDatabase() {
@@ -181,6 +196,36 @@ function initializeDatabase() {
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // Create indexes for improved query performance
+    db.run('CREATE INDEX IF NOT EXISTS idx_tasks_category ON tasks(category)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_tasks_parent_id ON tasks(parent_task_id)');
+    
+    db.run('CREATE INDEX IF NOT EXISTS idx_calendar_start_time ON calendar_events(start_time)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_calendar_event_type ON calendar_events(event_type)');
+    
+    db.run('CREATE INDEX IF NOT EXISTS idx_reminders_status ON reminders(status)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_reminders_time ON reminders(reminder_time)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_reminders_priority ON reminders(priority)');
+    
+    db.run('CREATE INDEX IF NOT EXISTS idx_financial_type ON financial_transactions(type)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_financial_date ON financial_transactions(date)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_financial_category ON financial_transactions(category)');
+    
+    db.run('CREATE INDEX IF NOT EXISTS idx_contacts_type ON contacts(contact_type)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_contacts_name ON contacts(name)');
+    
+    db.run('CREATE INDEX IF NOT EXISTS idx_comm_log_contact ON communications_log(contact_id)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_comm_log_date ON communications_log(date_time)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_comm_log_followup ON communications_log(follow_up_required, follow_up_date)');
+    
+    db.run('CREATE INDEX IF NOT EXISTS idx_knowledge_category ON knowledge_base(category)');
+    
+    db.run('CREATE INDEX IF NOT EXISTS idx_business_goals_status ON business_goals(status)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_business_goals_type ON business_goals(goal_type)');
 
     console.log('✅ Database schema initialized');
   });

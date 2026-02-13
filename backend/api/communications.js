@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const cache = require('../utils/cache');
 
 // Get all contacts
 router.get('/contacts', (req, res) => {
@@ -93,7 +94,7 @@ router.delete('/contacts/:id', (req, res) => {
 
 // Get communication logs
 router.get('/logs', (req, res) => {
-  const { contact_id, communication_type, start_date, end_date } = req.query;
+  const { contact_id, communication_type, start_date, end_date, page, limit } = req.query;
   let query = 'SELECT cl.*, c.name as contact_name FROM communications_log cl LEFT JOIN contacts c ON cl.contact_id = c.id WHERE 1=1';
   const params = [];
 
@@ -116,12 +117,57 @@ router.get('/logs', (req, res) => {
 
   query += ' ORDER BY cl.date_time DESC';
 
+  // Add pagination
+  const pageNum = parseInt(page) || 1;
+  const limitNum = parseInt(limit) || 50;
+  const offset = (pageNum - 1) * limitNum;
+  
+  query += ' LIMIT ? OFFSET ?';
+  params.push(limitNum, offset);
+
   db.all(query, params, (err, rows) => {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
     }
-    res.json(rows);
+    
+    // Get total count for pagination metadata
+    let countQuery = 'SELECT COUNT(*) as total FROM communications_log cl WHERE 1=1';
+    const countParams = [];
+    
+    if (contact_id) {
+      countQuery += ' AND cl.contact_id = ?';
+      countParams.push(contact_id);
+    }
+    if (communication_type) {
+      countQuery += ' AND cl.communication_type = ?';
+      countParams.push(communication_type);
+    }
+    if (start_date) {
+      countQuery += ' AND cl.date_time >= ?';
+      countParams.push(start_date);
+    }
+    if (end_date) {
+      countQuery += ' AND cl.date_time <= ?';
+      countParams.push(end_date);
+    }
+    
+    db.get(countQuery, countParams, (err, countRow) => {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      
+      res.json({
+        data: rows,
+        pagination: {
+          page: pageNum,
+          limit: limitNum,
+          total: countRow.total,
+          totalPages: Math.ceil(countRow.total / limitNum)
+        }
+      });
+    });
   });
 });
 
@@ -170,6 +216,14 @@ router.get('/follow-ups', (req, res) => {
 
 // Get quick response templates
 router.get('/templates', (req, res) => {
+  const cacheKey = 'communication-templates';
+  
+  // Check cache first
+  const cachedData = cache.get(cacheKey);
+  if (cachedData) {
+    return res.json(cachedData);
+  }
+  
   const templates = [
     {
       id: 1,
@@ -196,6 +250,9 @@ router.get('/templates', (req, res) => {
       content: 'Thank you for [SPECIFIC ACTION]. I really appreciate your [TIME/HELP/SUPPORT].'
     }
   ];
+  
+  // Cache for 1 hour
+  cache.set(cacheKey, templates, 3600000);
   
   res.json(templates);
 });
