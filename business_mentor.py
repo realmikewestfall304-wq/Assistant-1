@@ -50,30 +50,133 @@ class BusinessMentorAgent:
     
     def _analyze_situation(self, query: str, context: Optional[Dict]) -> str:
         """Analyze the business situation objectively"""
-        return f"Based on your situation, here's the reality: [Analysis would go here based on query context]"
+        parts = []
+        q_lower = (query or "").lower()
+        
+        # Add context if available
+        if context:
+            if "revenue" in context:
+                parts.append(f"Current revenue: ${context['revenue']:,}")
+            if "team_size" in context or "employees" in context:
+                size = context.get("team_size") or context.get("employees")
+                parts.append(f"Team size: {size} people")
+            if "growth_rate" in context:
+                parts.append(f"Growth rate: {context['growth_rate']}")
+        
+        # Analyze based on query topic
+        analysis = "Based on your situation"
+        if parts:
+            analysis += f" ({', '.join(parts)})"
+        analysis += ", here's the reality: "
+        
+        if any(word in q_lower for word in ["hire", "team", "staff", "employee"]):
+            analysis += "You're at a critical scaling point. Hiring impacts both capacity and burn rate."
+        elif any(word in q_lower for word in ["price", "pricing", "cost", "charge"]):
+            analysis += "Pricing is a positioning decision, not just a revenue lever. Wrong pricing signals wrong market."
+        elif any(word in q_lower for word in ["market", "expand", "international", "new product"]):
+            analysis += "Expansion requires capital, focus, and execution capability. Most businesses expand too early."
+        elif any(word in q_lower for word in ["revenue", "sales", "customer"]):
+            analysis += "Revenue issues are usually symptoms of product-market fit or go-to-market problems."
+        else:
+            analysis += "This requires a straightforward assessment of risks versus potential returns."
+        
+        return analysis
     
     def _provide_honest_feedback(self, query: str, context: Optional[Dict]) -> str:
         """Provide direct, unfiltered feedback"""
-        return "Let me be straight with you: [Direct feedback based on query]"
+        q_lower = (query or "").lower()
+        
+        # Direct feedback based on common patterns
+        if any(word in q_lower for word in ["should i", "is it time", "when should"]):
+            feedback = "Let me be straight with you: If you're asking, you're probably not ready. "
+            feedback += "The right time is when you have clear metrics showing you NEED to, not when you WANT to."
+        elif "lower" in q_lower and "price" in q_lower:
+            feedback = "Let me be straight with you: Competing on price is a race to the bottom. "
+            feedback += "If price is your only differentiator, you don't have a real business—you have a commodity."
+        elif any(word in q_lower for word in ["hire", "fire", "employee"]):
+            feedback = "Let me be straight with you: People decisions are the hardest but most impactful. "
+            feedback += "Wrong people cost you months of momentum. Right people multiply your output."
+        elif "expand" in q_lower or "international" in q_lower:
+            feedback = "Let me be straight with you: Most expansions fail because businesses don't dominate their current market first. "
+            feedback += "Master one market before attempting two."
+        else:
+            feedback = "Let me be straight with you: The answer depends on whether you're making this decision from strength or desperation. "
+            feedback += "Desperate decisions rarely work out."
+        
+        return feedback
     
     def _generate_action_plan(self, query: str, context: Optional[Dict]) -> List[str]:
         """Generate concrete, actionable steps"""
-        return [
-            "Immediate action: [Specific step]",
-            "Within 1 week: [Specific step]",
-            "Within 1 month: [Specific step]"
-        ]
+        q_lower = (query or "").lower()
+        
+        if "hire" in q_lower or "staff" in q_lower:
+            return [
+                "Immediate action: Document exactly what work isn't getting done and why",
+                "Within 1 week: Calculate if revenue per employee supports another hire",
+                "Within 1 month: If metrics support it, write detailed job spec and start recruiting"
+            ]
+        elif "price" in q_lower or "pricing" in q_lower:
+            return [
+                "Immediate action: Survey your best customers on what they value most",
+                "Within 1 week: Analyze competitor positioning and pricing tiers",
+                "Within 1 month: Test new pricing with new prospects, not existing customers"
+            ]
+        elif "expand" in q_lower or "market" in q_lower:
+            return [
+                "Immediate action: Define what 'success' looks like in current market (market share %)",
+                "Within 1 week: Analyze if you're top 3 in current market. If not, stay focused here.",
+                "Within 1 month: If you're dominant locally, research one adjacent market thoroughly"
+            ]
+        else:
+            return [
+                "Immediate action: Write down your decision criteria and what success looks like",
+                "Within 1 week: Gather hard data on costs, timeline, and expected outcomes",
+                "Within 1 month: Make decision based on data, not gut feel. Then commit fully or drop it."
+            ]
     
     def _estimate_timeline(self, query: str) -> str:
         """Provide realistic timeline expectations"""
-        return "Realistic timeline: [Time estimate based on query]"
+        q_lower = (query or "").lower()
+        
+        if "hire" in q_lower:
+            return "Realistic timeline: 2-3 months to hire, 3-6 months until they're productive. Budget 6 months total."
+        elif "price" in q_lower or "pricing" in q_lower:
+            return "Realistic timeline: 2-4 weeks to research and decide, 1-2 months to test with new customers."
+        elif "expand" in q_lower or "international" in q_lower:
+            return "Realistic timeline: 6-12 months for proper market entry, 18-24 months to profitability."
+        elif "product" in q_lower:
+            return "Realistic timeline: 3-6 months to build and launch, 6-12 months to product-market fit."
+        else:
+            return "Realistic timeline: Most business initiatives take 2x longer and cost 1.5x more than you think. Plan accordingly."
     
     def _define_success_metrics(self, query: str) -> List[str]:
         """Define clear success metrics"""
-        return [
-            "Metric 1: [Measurable outcome]",
-            "Metric 2: [Measurable outcome]"
-        ]
+        q_lower = (query or "").lower()
+        
+        if "hire" in q_lower or "team" in q_lower:
+            return [
+                "Revenue per employee increases or stays flat",
+                "Key deliverables that were blocked are now shipping on time",
+                "New hire becomes net-positive within 6 months"
+            ]
+        elif "price" in q_lower or "pricing" in q_lower:
+            return [
+                "Customer acquisition cost stays same or decreases",
+                "Profit margin increases by at least 5 percentage points",
+                "Close rate on new pricing is 20%+ (healthy B2B benchmark)"
+            ]
+        elif "expand" in q_lower or "market" in q_lower:
+            return [
+                "New market represents 15%+ of revenue within 18 months",
+                "Customer acquisition cost in new market is within 150% of current market",
+                "Net Promoter Score in new market matches current market"
+            ]
+        else:
+            return [
+                "Define clear before/after metrics specific to your decision",
+                "Set a checkpoint at 90 days to evaluate progress",
+                "Measure actual results vs. projected—be honest about gaps"
+            ]
     
     def _format_mentor_response(self, response: Dict) -> str:
         """Format the response in a direct, professional manner"""
@@ -237,7 +340,26 @@ class OfficeTaskManager:
     
     def _archive_email(self, email_id: int) -> Dict:
         """Archive an email"""
-        return {"status": "success", "email_id": email_id}
+        if email_id is None:
+            return {
+                "status": "error",
+                "message": "email_id is required"
+            }
+        
+        for email in self.email_inbox:
+            if email.get("id") == email_id:
+                email["status"] = "archived"
+                email["archived_at"] = datetime.now().isoformat()
+                return {
+                    "status": "success",
+                    "email_id": email_id,
+                    "message": "Email archived"
+                }
+        
+        return {
+            "status": "error",
+            "message": f"Email {email_id} not found"
+        }
     
     # Phone Call Management Methods
     def _log_call(self, call_data: Dict) -> Dict:
@@ -301,7 +423,19 @@ class OfficeTaskManager:
     
     def _cancel_appointment(self, appointment_id: int) -> Dict:
         """Cancel an appointment"""
-        return {"status": "success", "appointment_id": appointment_id}
+        for apt in self.appointments:
+            if apt.get("id") == appointment_id:
+                apt["status"] = "cancelled"
+                apt["cancelled_at"] = datetime.now().isoformat()
+                return {
+                    "status": "success",
+                    "appointment_id": appointment_id,
+                    "message": "Appointment cancelled"
+                }
+        return {
+            "status": "error",
+            "message": f"Appointment {appointment_id} not found"
+        }
     
     def _list_appointments(self, date_range: Optional[Dict]) -> Dict:
         """List appointments for a date range"""
@@ -313,11 +447,52 @@ class OfficeTaskManager:
     
     def _check_conflicts(self, proposed_time: str) -> Dict:
         """Check for scheduling conflicts"""
-        return {
-            "status": "success",
-            "has_conflict": False,
-            "conflicts": []
-        }
+        try:
+            # Parse proposed time (expect ISO format datetime string)
+            proposed_dt = datetime.fromisoformat(proposed_time)
+            proposed_duration = 60  # default 60 minutes
+            proposed_end = proposed_dt + timedelta(minutes=proposed_duration)
+            
+            # Get buffer time from config (default 15 minutes)
+            buffer_minutes = 15
+            
+            conflicts = []
+            for apt in self.appointments:
+                if "datetime" not in apt:
+                    continue
+                
+                try:
+                    apt_dt = datetime.fromisoformat(apt["datetime"])
+                    apt_duration = apt.get("duration", 60)
+                    apt_end = apt_dt + timedelta(minutes=apt_duration)
+                    
+                    # Check for overlap with buffer
+                    apt_start_with_buffer = apt_dt - timedelta(minutes=buffer_minutes)
+                    apt_end_with_buffer = apt_end + timedelta(minutes=buffer_minutes)
+                    
+                    # Conflict if proposed time overlaps with existing appointment + buffer
+                    if not (proposed_end <= apt_start_with_buffer or proposed_dt >= apt_end_with_buffer):
+                        conflicts.append({
+                            "appointment_id": apt.get("id"),
+                            "title": apt.get("title"),
+                            "datetime": apt.get("datetime"),
+                            "duration": apt_duration
+                        })
+                except (ValueError, TypeError):
+                    continue
+            
+            return {
+                "status": "success",
+                "has_conflict": len(conflicts) > 0,
+                "conflicts": conflicts
+            }
+        except (ValueError, TypeError) as e:
+            return {
+                "status": "error",
+                "message": f"Invalid datetime format: {str(e)}",
+                "has_conflict": False,
+                "conflicts": []
+            }
     
     # Quote Management Methods
     def _create_quote(self, quote_data: Dict) -> Dict:
@@ -440,44 +615,34 @@ class IntegratedAssistant:
                 )
             }
         elif request_type == "email":
+            action = kwargs.pop("action", "list")
             return {
                 "type": "email",
-                "response": self.office_manager.manage_emails(
-                    kwargs.get("action", "list"),
-                    **kwargs
-                )
+                "response": self.office_manager.manage_emails(action, **kwargs)
             }
         elif request_type == "call":
+            action = kwargs.pop("action", "get_log")
             return {
                 "type": "call",
-                "response": self.office_manager.manage_phone_calls(
-                    kwargs.get("action", "get_log"),
-                    **kwargs
-                )
+                "response": self.office_manager.manage_phone_calls(action, **kwargs)
             }
         elif request_type == "appointment":
+            action = kwargs.pop("action", "list")
             return {
                 "type": "appointment",
-                "response": self.office_manager.manage_appointments(
-                    kwargs.get("action", "list"),
-                    **kwargs
-                )
+                "response": self.office_manager.manage_appointments(action, **kwargs)
             }
         elif request_type == "quote":
+            action = kwargs.pop("action", "list")
             return {
                 "type": "quote",
-                "response": self.office_manager.manage_quotes(
-                    kwargs.get("action", "list"),
-                    **kwargs
-                )
+                "response": self.office_manager.manage_quotes(action, **kwargs)
             }
         elif request_type == "paperwork":
+            action = kwargs.pop("action", "organize")
             return {
                 "type": "paperwork",
-                "response": self.office_manager.manage_paperwork(
-                    kwargs.get("action", "organize"),
-                    **kwargs
-                )
+                "response": self.office_manager.manage_paperwork(action, **kwargs)
             }
         else:
             return {
@@ -487,25 +652,79 @@ class IntegratedAssistant:
     
     def get_dashboard(self) -> Dict[str, Any]:
         """Get a dashboard overview of all tasks and status"""
+        now = datetime.now()
+        today = now.date()
+        
+        # Count unread emails
+        unread_count = sum(1 for email in self.office_manager.email_inbox 
+                          if not email.get("read", True))
+        
+        # Count today's calls and follow-ups
+        calls_today = 0
+        follow_ups = 0
+        for call in self.office_manager.call_log:
+            if "timestamp" in call:
+                try:
+                    call_date = datetime.fromisoformat(call["timestamp"]).date()
+                    if call_date == today:
+                        calls_today += 1
+                except (ValueError, TypeError):
+                    pass
+            if call.get("follow_up_required"):
+                follow_ups += 1
+        
+        # Count today's and this week's appointments
+        appointments_today = 0
+        appointments_this_week = 0
+        week_start = today - timedelta(days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+        
+        for apt in self.office_manager.appointments:
+            if "datetime" in apt:
+                try:
+                    apt_date = datetime.fromisoformat(apt["datetime"]).date()
+                    if apt_date == today:
+                        appointments_today += 1
+                    if week_start <= apt_date <= week_end:
+                        appointments_this_week += 1
+                except (ValueError, TypeError):
+                    pass
+        
+        # Count pending quotes
+        pending_quotes = sum(1 for quote in self.office_manager.quotes 
+                           if quote.get("status") in ["draft", "sent", "pending"])
+        
+        # Count urgent paperwork (deadlines within 7 days)
+        urgent_deadlines = 0
+        week_from_now = today + timedelta(days=7)
+        for doc in self.office_manager.paperwork:
+            if "deadline" in doc:
+                try:
+                    deadline = datetime.fromisoformat(doc["deadline"]).date()
+                    if today <= deadline <= week_from_now:
+                        urgent_deadlines += 1
+                except (ValueError, TypeError):
+                    pass
+        
         return {
             "emails": {
                 "total": len(self.office_manager.email_inbox),
-                "unread": 0
+                "unread": unread_count
             },
             "calls": {
-                "today": 0,
-                "follow_ups": 0
+                "today": calls_today,
+                "follow_ups": follow_ups
             },
             "appointments": {
-                "today": 0,
-                "this_week": len(self.office_manager.appointments)
+                "today": appointments_today,
+                "this_week": appointments_this_week
             },
             "quotes": {
-                "pending": 0,
+                "pending": pending_quotes,
                 "sent": len(self.office_manager.quotes)
             },
             "paperwork": {
-                "urgent_deadlines": 0,
+                "urgent_deadlines": urgent_deadlines,
                 "total": len(self.office_manager.paperwork)
             }
         }

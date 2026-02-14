@@ -5,7 +5,6 @@ Run the agent from the command line
 
 import sys
 import json
-from typing import Optional
 from business_mentor import IntegratedAssistant
 
 
@@ -134,8 +133,42 @@ def handle_quote_command(assistant: IntegratedAssistant, args: list):
         return
     
     action = args[0]
-    result = assistant.office_manager.manage_quotes(action)
-    print(json.dumps(result, indent=2))
+    
+    if action == "list":
+        result = assistant.office_manager.manage_quotes("list")
+        print(json.dumps(result, indent=2))
+    elif action == "create":
+        if len(args) < 4:
+            print("USAGE: python cli.py quote create <client> <total> <valid_until>")
+            print("Example: python cli.py quote create 'Acme Corp' 5000 '2026-03-31'")
+            return
+        kwargs = {
+            "client": args[1],
+            "total": float(args[2]),
+            "valid_until": args[3],
+            "items": []  # Could be expanded to accept items
+        }
+        result = assistant.office_manager.manage_quotes("create", **kwargs)
+        print(json.dumps(result, indent=2))
+    elif action == "send":
+        if len(args) < 3:
+            print("USAGE: python cli.py quote send <quote_id> <recipient>")
+            return
+        kwargs = {
+            "quote_id": int(args[1]),
+            "recipient": args[2]
+        }
+        result = assistant.office_manager.manage_quotes("send", **kwargs)
+        print(json.dumps(result, indent=2))
+    elif action == "track":
+        if len(args) < 2:
+            print("USAGE: python cli.py quote track <quote_id>")
+            return
+        result = assistant.office_manager.manage_quotes("track", quote_id=int(args[1]))
+        print(json.dumps(result, indent=2))
+    else:
+        result = assistant.office_manager.manage_quotes(action)
+        print(json.dumps(result, indent=2))
 
 
 def handle_paperwork_command(assistant: IntegratedAssistant, args: list):
@@ -146,8 +179,34 @@ def handle_paperwork_command(assistant: IntegratedAssistant, args: list):
         return
     
     action = args[0]
-    result = assistant.office_manager.manage_paperwork(action)
-    print(json.dumps(result, indent=2))
+    
+    if action == "file":
+        if len(args) < 4:
+            print("USAGE: python cli.py paperwork file <title> <category> <file_path> [deadline]")
+            print("Example: python cli.py paperwork file 'Contract' contracts /docs/contract.pdf '2026-03-15'")
+            return
+        kwargs = {
+            "title": args[1],
+            "category": args[2],
+            "file_path": args[3]
+        }
+        if len(args) > 4:
+            kwargs["deadline"] = args[4]
+        result = assistant.office_manager.manage_paperwork("file", **kwargs)
+        print(json.dumps(result, indent=2))
+    elif action == "retrieve":
+        if len(args) < 2:
+            print("USAGE: python cli.py paperwork retrieve <document_id>")
+            return
+        result = assistant.office_manager.manage_paperwork("retrieve", document_id=int(args[1]))
+        print(json.dumps(result, indent=2))
+    elif action == "organize":
+        category = args[1] if len(args) > 1 else None
+        result = assistant.office_manager.manage_paperwork("organize", category=category)
+        print(json.dumps(result, indent=2))
+    else:
+        result = assistant.office_manager.manage_paperwork(action)
+        print(json.dumps(result, indent=2))
 
 
 def handle_dashboard_command(assistant: IntegratedAssistant, args: list):
@@ -201,9 +260,26 @@ def main():
         # Handle call commands
         if not args:
             result = assistant.office_manager.manage_phone_calls("get_log")
+            print(json.dumps(result, indent=2))
         else:
-            result = assistant.office_manager.manage_phone_calls(args[0])
-        print(json.dumps(result, indent=2))
+            action = args[0]
+            if action == "log":
+                if len(args) < 3:
+                    print("USAGE: python cli.py call log <caller> <duration> [notes]")
+                    print("Example: python cli.py call log 'John Doe' 15 'Discussed pricing'")
+                    return
+                kwargs = {
+                    "caller": args[1],
+                    "duration": int(args[2]),
+                    "notes": " ".join(args[3:]) if len(args) > 3 else "",
+                    "follow_up_required": False
+                }
+                result = assistant.office_manager.manage_phone_calls("log", **kwargs)
+            elif action == "get_log":
+                result = assistant.office_manager.manage_phone_calls("get_log")
+            else:
+                result = assistant.office_manager.manage_phone_calls(action)
+            print(json.dumps(result, indent=2))
     elif command == "appointment":
         handle_appointment_command(assistant, args)
     elif command == "quote":
