@@ -137,34 +137,61 @@ python cli.py dashboard
 ### Option 2: Server Deployment
 Deploy on a server for 24/7 availability:
 
-1. **Using systemd (Linux)**
-   Create `/etc/systemd/system/business-mentor.service`:
+1. **Using systemd (Linux)** - For scheduled tasks or continuous operation
+   
+   Note: The CLI is designed for interactive/scheduled use, not as a long-running daemon.
+   For scheduled tasks, use systemd timers or cron instead.
+   
+   Example systemd timer for daily dashboard check:
+   
+   `/etc/systemd/system/business-mentor.timer`:
    ```ini
    [Unit]
-   Description=Business Mentor Agent
-   After=network.target
-
+   Description=Business Mentor Daily Check
+   
+   [Timer]
+   OnCalendar=daily
+   Persistent=true
+   
+   [Install]
+   WantedBy=timers.target
+   ```
+   
+   `/etc/systemd/system/business-mentor.service`:
+   ```ini
+   [Unit]
+   Description=Business Mentor Agent Check
+   
    [Service]
-   Type=simple
+   Type=oneshot
    User=your_username
    WorkingDirectory=/path/to/Assistant-1
    ExecStart=/path/to/Assistant-1/venv/bin/python cli.py dashboard
-   Restart=always
-
-   [Install]
-   WantedBy=multi-user.target
    ```
-
-   Enable and start:
+   
+   Enable the timer:
    ```bash
-   sudo systemctl enable business-mentor
-   sudo systemctl start business-mentor
+   sudo systemctl enable business-mentor.timer
+   sudo systemctl start business-mentor.timer
    ```
 
-2. **Using Docker** (if you create a Dockerfile)
+2. **Using Docker** (for containerized deployment)
+   
+   Create a `Dockerfile`:
+   ```dockerfile
+   FROM python:3.9-slim
+   WORKDIR /app
+   COPY requirements.txt .
+   RUN pip install -r requirements.txt
+   COPY . .
+   CMD ["python", "cli.py", "help"]
+   ```
+   
+   Build and run:
    ```bash
    docker build -t business-mentor .
-   docker run -d -p 8000:8000 business-mentor
+   # Run interactively
+   docker run -it business-mentor python cli.py mentor "Your question"
    ```
 
 ### Option 3: Cloud Deployment
@@ -257,9 +284,23 @@ CRM_API_KEY=your_api_key
    ```
 
 ### Logs
-Check logs for errors:
+The agent currently outputs to stdout/stderr. To capture logs:
 ```bash
-tail -f logs/agent.log
+# Redirect output to a file
+python cli.py dashboard > output.log 2>&1
+
+# Or use with systemd for automatic logging
+# Logs will appear in: journalctl -u business-mentor
+```
+
+To implement file-based logging, add to your code:
+```python
+import logging
+logging.basicConfig(
+    filename='logs/agent.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 ```
 
 ## Maintenance

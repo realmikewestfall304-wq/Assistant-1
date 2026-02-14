@@ -20,11 +20,11 @@ This agent serves dual roles:
 - **Success Metrics**: Clear, measurable goals
 
 ### Office Task Management
-- **Email Management**: Sort, send, categorize, and auto-respond
-- **Phone Call Handling**: Log calls, schedule callbacks, screen calls
-- **Appointment Scheduling**: Calendar management with conflict detection
-- **Quote Generation**: Create, send, and track quotes
-- **Paperwork Organization**: Digital filing, deadline tracking, document management
+- **Email Management**: Send, list, categorize, and archive emails (in-memory storage)
+- **Phone Call Handling**: Log calls with notes and follow-up tracking
+- **Appointment Scheduling**: Calendar management with automatic conflict detection
+- **Quote Generation**: Create and track quotes with line items
+- **Paperwork Organization**: Digital filing with deadline tracking and alerts
 
 ## 🚀 Quick Start
 
