@@ -1,0 +1,41 @@
+# Docker Compose for Business Mentor Agent
+version: '3.8'
+
+services:
+  assistant:
+    build: .
+    image: business-mentor-agent:latest
+    container_name: business-mentor
+    environment:
+      - AGENT_NAME=Business Mentor Assistant
+      - AGENT_ENVIRONMENT=production
+    volumes:
+      # Mount .env file if you have one
+      - ./.env:/app/.env:ro
+      # Optional: Mount a data directory for persistence
+      - ./data:/app/data
+    # Run interactively by default
+    stdin_open: true
+    tty: true
+    # Override command to run dashboard
+    command: python cli.py dashboard
+    restart: unless-stopped
+
+  # Optional: Add a scheduler service for periodic tasks
+  scheduler:
+    build: .
+    image: business-mentor-agent:latest
+    container_name: business-mentor-scheduler
+    environment:
+      - AGENT_NAME=Business Mentor Assistant
+      - AGENT_ENVIRONMENT=production
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./data:/app/data
+    # Run daily dashboard check
+    command: >
+      sh -c "while true; do
+        python cli.py dashboard;
+        sleep 86400;
+      done"
+    restart: unless-stopped
